@@ -26,12 +26,13 @@ INSERT INTO employeeRole (title, salary, department_id) VALUES ('Human Relations
 
 USE employee_DB;
 SELECT * FROM employeeRole;
+
+-- reorder;
 USE employee_DB;
 SELECT title
     FROM employeeRole
-    -- ORDER BY department_id in ascending order, same with title
     ORDER BY department_id ASC, title ASC;
 
 -- EMPLOYEES
 -- =============
-INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('Michael', 'Scott', 9, 1);
+INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ('Michael', 'Scott', 8, 1);

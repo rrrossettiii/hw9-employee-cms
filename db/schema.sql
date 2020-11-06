@@ -10,7 +10,7 @@ USE employee_db;
 -- =============
 CREATE TABLE department (
     id INT NOT NULL AUTO_INCREMENT,
-    name VARCHAR(30) NOT NULL,
+    name VARCHAR(40) NOT NULL,
     PRIMARY KEY(id)
 );
 
@@ -18,7 +18,7 @@ CREATE TABLE department (
 -- =============
 CREATE TABLE employeeRole (
 	id INT NOT NULL AUTO_INCREMENT,
-    title VARCHAR(30) NOT NULL,
+    title VARCHAR(40) NOT NULL,
 	salary decimal NOT NULL,
     department_id INT,
     CONSTRAINT fk_department
@@ -34,12 +34,12 @@ CREATE TABLE employees(
     first_name VARCHAR(30) NOT NULL,
 	last_name VARCHAR(30) NOT NULL,
     role_id INT,
-    CONSTRAINT fk_role
+    CONSTRAINT fk_employeeRole
     FOREIGN KEY (role_id)
-        REFERENCES role(id) ON DELETE SET NULL,
+        REFERENCES employeeRole(id) ON DELETE SET NULL,
 	manager_id INT,
     CONSTRAINT fk_manager
     FOREIGN KEY (manager_id)
-        REFERENCES employee(id) ON DELETE SET NULL,
+        REFERENCES employees(id) ON DELETE SET NULL,
     PRIMARY KEY (id)
 );
