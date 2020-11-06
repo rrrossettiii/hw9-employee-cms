@@ -1,10 +1,11 @@
 // Dependencies;
-// =============
+// =============*
+const sqlQueries = require("./db/queries");
 const inquirer = require("inquirer");
 const mysql = require("mysql");
 
 // MYSQL;
-// =============
+// =============*
 var connection = mysql.createConnection({
 	host: "localhost",
 	port: 3306,
@@ -13,78 +14,126 @@ var connection = mysql.createConnection({
 	database: "employee_db",
 });
 
+// -on connect;
 connection.connect(function (err) {
 	if (err) throw err;
 	console.log("connected as id " + connection.threadId);
-	init();
+	promptOptions();
 });
 
+promptOptions();
+// Options;
+// =============
+function promptOptions() {
+	departmentList = [];
+	departmentListObj = {};
+	roleList = [];
+	roleListObj = {};
+	employeeList = [];
+	employeeListObj = {};
+
+	// - Department IDs and Names;
+	connection.query(sqlQueries.GetDepartments(), function (err, results) {
+		if (err) throw err;
+		for (let i = 0; i < results.length; i++) {
+			departmentList.push(results[i].name);
+		}
+		departmentListObject = results;
+		console.log(departmentListObj);
+	});
+
+	// - Role IDs and Titles;
+	connection.query(sqlQueries.GetRoles(), function (err, results) {
+		if (err) throw err;
+		for (let i = 0; i < results.length; i++) {
+			roleList.push(results[i].title);
+		}
+		roleListObject = results;
+		console.log(roleListObj);
+	});
+
+	// - Employee IDs and Names;
+	connection.query(sqlQueries.GetEmployeeNames(), function (err, results) {
+		if (err) throw err;
+		employeeList.push("None");
+		for (let i = 0; i < results.length; i++) {
+			employeeList.push(results[i].first_name + " " + results[i].last_name);
+		}
+		employeeListObject = results;
+		console.log(employeeListObj);
+	});
+	return (optionsOBJ = [departmentList, roleList, employeeList]);
+}
+
 // Prompts;
-// ============
+// ============*
 async function runPrompts() {
 	await inquirer
 		.prompt({
 			name: "option",
-			type: "rawlist",
+			type: "list",
 			message: "Select option:",
 			choices: [
-				"View employees",
-				"Add employees",
-				"Update employee roles",
-				"Update employee manager",
-				"Delete employees",
-				"View roles",
-				"Add roles",
-				"Delete roles",
-				"View departments",
-				"Add departments",
-				"Delete departments",
+				new inquirer.Separator(":====EMPLOYEE====:"),
+				"= View Employees =",
+				"+ Add Employee +",
+				"^ Update Employee Role ^",
+				"^^ Update Employee Manager ^^",
+				"- Delete Employee -",
+				new inquirer.Separator(":======ROLE======:"),
+				"= View Roles =",
+				"+ Add Role +",
+				"- Delete Role -",
+				new inquirer.Separator(":===DEPARTMENT===:"),
+				"= View Departments =",
+				"+ Add Department +",
+				"- Delete Department -",
 			],
 		})
 		.then(
 			await function (response) {
 				switch (response.option) {
-					case "View employees":
+					case "= View employees =":
 						viewEmployees();
 						break;
 
-					case "Add employees":
+					case "+ Add Employee +":
 						addEmployees();
 						break;
 
-					case "Delete employees":
+					case "- Delete Employee -":
 						deleteEmployees();
 						break;
 
-					case "Update employee roles":
+					case "^ Update Employee Role ^":
 						updateEmployeeRoles();
 						break;
 
-					case "Update employee manager":
+					case "^^ Update Employee Manager ^^":
 						updateEmployeeManager();
 						break;
 
-					case "View roles":
+					case "= View Roles =":
 						viewRoles();
 						break;
 
-					case "Add roles":
+					case "+ Add Role +":
 						addRoles();
 						break;
 
-					case "Delete roles":
+					case "- Delete Role -":
 						deleteRoles();
 						break;
 
-					case "View departments":
+					case "= View Departments +":
 						viewDepartments();
 						break;
 
-					case "Add departments":
+					case "+ Add Department +":
 						addDepartments();
 						break;
 
-					case "Delete Departments":
+					case "- Delete Department -":
 						deleteDepartments();
 						break;
 				}
@@ -93,7 +142,7 @@ async function runPrompts() {
 }
 
 // Employee Functions;
-// =============
+// =============*
 // - View;
 async function viewEmployees() {
 	var query =
@@ -105,6 +154,8 @@ async function viewEmployees() {
 }
 // - Add;
 async function addEmployees() {
+	var query =
+		'SELECT CONCAT(first_name , " ", last_name) AS name, id AS value FROM employee_DB.employees;';
 	await inquirer
 		.prompt(
 			{
@@ -119,8 +170,9 @@ async function addEmployees() {
 			},
 			{
 				name: "role",
-				type: "input",
+				type: "list",
 				message: "What is the employee's role?",
+				choices: roleList,
 			}
 		)
 		.then(async function (answer) {
@@ -137,14 +189,14 @@ async function addEmployees() {
 async function deleteEmployees() {
 	var query =
 		'SELECT CONCAT(first_name , " ", last_name) AS name, id AS value FROM employee_DB.employees;';
-	connection.query(query, function (err, response) {
+	connection.query(query, async function (err, response) {
 		console.table(response);
-		inquirer
+		await inquirer
 			.prompt({
 				name: "delete",
+				message: "Select Employee to delete:",
 				type: "list",
 				choices: response,
-				message: "who would you like to delete",
 			})
 			.then(function (answer) {
 				let deleteID = answer.delete;
@@ -165,6 +217,4 @@ async function deleteEmployees() {
 }
 
 // Role Functions;
-// =============
-
-runPrompts();
+// =============*
